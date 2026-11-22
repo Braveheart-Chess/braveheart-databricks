@@ -104,7 +104,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v7
-      - uses: databricks/setup-cli@v1.26.0
+      - uses: databricks/setup-cli@v1.27.0
       - uses: astral-sh/setup-uv@v10.3.3 # no v10 major tag exists
       # Offline: `bundle validate` needs a workspace login, which pull requests never hold.
       - name: Check the bundle against the CLI's schema
