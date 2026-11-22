@@ -27,39 +27,56 @@ The hooks are a convenience. CI is the authoritative check.
 
 ## Commit messages
 
-Every commit is a **single-line** [Conventional Commit](https://www.conventionalcommits.org/)
-of at most 100 characters. Details go in the pull request description, never in a commit body.
+Every commit is a **single-line** [Conventional Commit](https://www.conventionalcommits.org/) with a type and a scope:
 
-- Format: `type(scope)?: subject`, with an imperative, lowercase subject and no trailing period.
-- The only thing allowed after the header is a blank line followed by
-  `Co-authored-by: Name <email>` trailers.
-- Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `ci`, `build`, `perf`, `style`, `test`, `revert`.
-- A breaking change is marked with `!`, as in `feat!: drop a compute policy`.
-- The type drives the next version: `feat` bumps the minor version, `fix` the patch,
-  and `!` the major (the minor while the version is below 1.0).
+```
+type(scope): subject
+```
+
+- At most 100 characters, with an imperative, lowercase subject and no trailing period.
+- `type` is one of `feat`, `fix`, `perf`, `revert`, `docs`, `refactor`, `test`, `build`, `ci`, `style`, `chore`: the same set in every repository.
+- `scope` is required: exactly one of the scopes below. A change that spans two is two pull requests, or takes the scope it is mostly about.
+- Breaking changes are marked with `!`, for example `feat(bundle)!: drop a compute policy`.
+- The only content allowed after the header is a blank line followed by `Co-authored-by: Name <email>` trailers, in any letter case. No body text. Details belong in the PR description.
+- The type drives the next version: `feat` bumps the minor version, `fix` the patch, and `!` the major (the minor while the version is below 1.0).
 
 | Message | Valid |
 | --- | --- |
-| `feat: add a workspace user` | Yes |
-| `fix: correct a policy name` + blank line + `Co-authored-by: Claude <noreply@anthropic.com>` | Yes |
-| `feat: add thing` + blank line + `This adds the thing because…` | No, body text |
-| `Added thing` | No, not conventional |
+| `feat(bundle): add a workspace user` | Yes |
+| `fix(bundle): correct a policy name` + blank line + `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` | Yes |
+| `feat: add a workspace user` | No, no scope |
+| `feat(nope): add a workspace user` | No, not one of this repository's scopes |
+| `feat(bundle): add a workspace user` + blank line + `This adds…` | No, body text |
 
-CI lints every commit in the pull request, and the pull request title separately.
+commitlint enforces this with `@commitlint/config-conventional` plus two local rules in `tools/commitlint/`: `only-coauthor-trailers` fails on any line after the header that is not blank or a `Co-authored-by` trailer, and `single-scope` fails on a list such as `feat(a,b)`. The fixtures in `tests/commitlint/` show accepted and rejected messages. CI lints every commit in the PR range, so a rebase merge never lands a non-conforming commit on `main`, and lints the PR title through the same config. The standard behind it is the [repository conventions](https://github.com/jwallace145/repository-template/blob/main/repository-conventions.md).
+
+### Scopes
+
+Every commit names exactly one of this repository's scopes. They are `SCOPES` in `commitlint.config.mjs`; this table mirrors it, in the same order, and `npm run test:commitlint` fails if they drift. Adding, renaming or removing a scope goes through a pull request like any other change.
+
+| Scope | Covers |
+| --- | --- |
+| `analysis` | The `selfplay_analysis` package in `src/` and its tests |
+| `notebooks` | The notebooks in `notebooks/` |
+| `bundle` | `databricks.yml` and the jobs in `resources/` |
+| `research` | The research write-ups in `docs/` |
+| `deploy` | The Deploy workflow and `jaws.yaml` |
+| `repo` | README, CONTRIBUTING, AGENTS, commitlint, the PR and issue templates, and repository tooling |
+| `deps` | Dependency updates, mostly Dependabot's |
+| `release` | Release Please's release pull requests and its config |
 
 ## Pull requests
 
 Every change reaches `main` through a pull request. Nobody pushes to `main`.
 
-- The title is a valid Conventional Commit: squash merges use it as the commit message.
-- Open the pull request with a typed template and fill in every section:
-
-  ```sh
-  gh pr create --template <feat|fix|docs|chore|refactor|ci>.md
-  ```
-
+- The title is a valid commit header, scope included: squash merges use it as the commit message. Release Please's own pull requests are titled `chore(release): release X.Y.Z`.
+- Fill in every section of the one template, `.github/pull_request_template.md` (Summary, Why, Changes, Verification, Checklist). Write "n/a" rather than deleting one.
 - Pull requests merge by squash or rebase only. There are no merge commits.
+- Dependabot's titles are `chore(deps): bump ...` and pass as they are; squash merge them.
 
+## Issues
+
+Open issues from the forms: **Bug**, **Feature** or **Task**. Blank issues are off.
 ## How a change reaches the workspace
 
 **The bundle** deploys when its change merges: the **Deploy** workflow signs in
