@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.2](https://github.com/Braveheart-Chess/braveheart-databricks/compare/v0.4.1...v0.4.2) (2026-11-22)
+
+
+### Bug Fixes
+
+* **repo:** let dependabot's capitalised bump titles pass ([#22](https://github.com/Braveheart-Chess/braveheart-databricks/issues/22)) ([ffb7380](https://github.com/Braveheart-Chess/braveheart-databricks/commit/ffb73808a0691487f115899d83cddf7981df1939))
+
 ## [0.4.1](https://github.com/Braveheart-Chess/braveheart-databricks/compare/v0.4.0...v0.4.1) (2026-11-20)
 
 
